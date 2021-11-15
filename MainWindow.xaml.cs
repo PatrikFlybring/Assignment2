@@ -133,6 +133,7 @@ namespace Assignment2 {
             
             selectFeedComboBox.Items.Add(newFeed.Title);
             selectFeedComboBox.SelectedItem = newFeed.Title;
+            addFeedTextBox.Clear();
             addFeedButton.IsEnabled = true;
         }
 
