@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -28,6 +29,11 @@ namespace Assignment2 {
         private StackPanel articlePanel;
         private List<WebsiteData> websiteList = new List<WebsiteData>();
         private List<FeedData> FeedDataList = new List<FeedData>();
+
+        // Sample feeds:
+        // https://www.cinemablend.com/rss/topic/news/movies
+        // https://screencrush.com/feed/
+
 
         public MainWindow() {
             InitializeComponent();
@@ -135,9 +141,14 @@ namespace Assignment2 {
 
             for (int i = 0; i < 5; i++) {
                 FeedData data = new FeedData();
+
                 data.Title = rssResults.Descendants("title").First().Value;
+
                 data.ArticleTitle = rssResults.Descendants("item").Descendants("title").Skip(i).First().Value;
-                data.PubDate = rssResults.Descendants("item").Descendants("pubDate").Skip(i).First().Value;
+
+                string dateTimeString = rssResults.Descendants("item").Descendants("pubDate").Skip(i).First().Value;
+                data.PubDate = DateTime.ParseExact(dateTimeString.Substring(0, 25), "ddd, dd MMM yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                
                 FeedDataList.Add(data);
             }
         }
@@ -171,7 +182,7 @@ namespace Assignment2 {
 
                 // Date + title
                 var articleTitle = new TextBlock {
-                    Text = feedData.PubDate + " " + feedData.ArticleTitle,
+                    Text = feedData.PubDate.ToString("yyyy-MM-dd HH:mm") + " - " + feedData.ArticleTitle,
                     FontWeight = FontWeights.Bold,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 };
@@ -189,7 +200,7 @@ namespace Assignment2 {
         public class FeedData {
             public string Title { get; set; }
             public string ArticleTitle { get; set; }
-            public string PubDate { get; set; }
+            public DateTime PubDate { get; set; }
         }
 
         public class WebsiteData {
@@ -201,7 +212,7 @@ namespace Assignment2 {
             // This is just to simulate a slow/large data transfer and make testing easier.
             // Remove it if you want to.
 
-            await Task.Delay(2000);
+            await Task.Delay(1000);
             var response = await http.GetAsync(url);
             response.EnsureSuccessStatusCode();
             var stream = await response.Content.ReadAsStreamAsync();
